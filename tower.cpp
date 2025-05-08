@@ -8,28 +8,49 @@
 Tower::Tower(Type type, const QPoint& pos)
     : towerType(type), position(pos), level(1), rotationAngle(0)
 {
+    // 计算新的位置
+        QPoint newPos = pos;
+        if (type == CANNON) {
+            // 炮塔坑的宽度为 80
+            int pitWidth = 80;
+            newPos.setX(pos.x() + pitWidth / 4);
+        }
+        position = newPos;
     // 根据不同的炮塔类型，初始化炮塔的属性和贴图
     switch (type) {
     case CANNON:
         pixmap.load(":/images/images/cannon.png");
-        range = 100; // 射程
-        damage = 20;
-        upgradeCost = 50;
+        upgradedPixmap.load(":/images/images/cannon_upgraded.png");
+        range = 200; // 射程
+        damage = 50;
+        upgradeCost = 80;
         sellPrice = 30;
+        // 设置旋转中心，这里假设旋转中心
+        rotationCenter = QPointF(position.x() + pixmap.width() / 2, position.y() + pixmap.height()/2);
         break;
     case POOP:
         pixmap.load(":/images/images/poop.png");
-        range = 80;
-        damage = 15;
-        upgradeCost = 40;
+        upgradedPixmap.load(":/images/images/poop_upgraded.png");
+        range = 200;
+        damage = 50;
+        upgradeCost = 80;
         sellPrice = 25;
         break;
     case STAR:
         pixmap.load(":/images/images/star.png");
-        range = 120;
-        damage = 25;
-        upgradeCost = 60;
+        upgradedPixmap.load(":/images/images/star_upgraded.png");
+        range = 240;
+        damage = 80;
+        upgradeCost = 80;
         sellPrice = 35;
+        break;
+    case FAN:
+        pixmap.load(":/images/images/fan.png");
+        upgradedPixmap.load(":/images/images/fan_upgraded.png");
+        range = 240;
+        damage = 30;
+        upgradeCost = 80;
+        sellPrice = 40;
         break;
     }
     // 初始化上次发射子弹的时间
@@ -45,42 +66,72 @@ Tower::~Tower()
 }
 
 // 绘制炮塔的方法实现
-void Tower::draw(QPainter* painter, const QList<Enemy *>& enemies)
+void Tower::draw(QPainter* painter, const QList<Enemy *>& enemies, Obstacle* obstacle)
 {
-    if (towerType == CANNON) {
-        QPointF targetPos;
-        // 寻找射程范围内已移动路径最远的敌人
-        Enemy* targetEnemy = nullptr;
-        double maxTraveledDistance = 0;
-        for (Enemy* enemy : enemies) {
-            if ((enemy->getPosition() - position).manhattanLength() <= range) {
-                double traveledDistance = enemy->getTraveledDistance();
-                if (traveledDistance > maxTraveledDistance) {
-                    maxTraveledDistance = traveledDistance;
-                    targetEnemy = enemy;
-                }
+    QPointF targetPos;
+    Enemy* targetEnemy = nullptr;
+    double maxTraveledDistance = 0;
+
+    // 寻找射程范围内已移动路径最远的敌人
+    for (Enemy* enemy : enemies) {
+        if ((enemy->getPosition() - position).manhattanLength() <= range) {
+            double traveledDistance = enemy->getTraveledDistance();
+            if (traveledDistance > maxTraveledDistance) {
+                maxTraveledDistance = traveledDistance;
+                targetEnemy = enemy;
             }
         }
-        if (targetEnemy) {
-            targetPos = targetEnemy->getPosition();
-            // 计算炮塔需要旋转的角度
-            QPointF diff = targetPos - position;
-            rotationAngle = qAtan2(diff.y(), diff.x()) * 180 / M_PI; // 更新旋转角度
-            painter->save();
-            // 平移到图片中心，以便围绕中心旋转
-            painter->translate(position.x() + pixmap.width() / 2, position.y() + pixmap.height() / 2);
-            painter->rotate(rotationAngle);
-            // 绘制旋转后的炮塔图片
-            painter->drawPixmap(-pixmap.width() / 2, -pixmap.height() / 2, pixmap.scaled(80, 80, Qt::KeepAspectRatio));
-            painter->restore();
-        } else {
-            // 若没有目标敌人，正常绘制炮塔图片
-            painter->drawPixmap(position, pixmap.scaled(80, 80, Qt::KeepAspectRatio));
-        }
-    } else {
-        // 非加农炮炮塔正常绘制
-        painter->drawPixmap(position, pixmap.scaled(80, 80, Qt::KeepAspectRatio));
     }
+
+    if (targetEnemy) {
+        targetPos = targetEnemy->getPosition();
+    }
+    else if (obstacle && isInRange(obstacle->getPosition())) {
+        targetPos = obstacle->getPosition();
+    }
+
+    if (!targetPos.isNull()) {
+        // 计算炮塔需要旋转的角度
+        QPointF diff = targetPos - position;
+        rotationAngle = qAtan2(diff.y(), diff.x()) * 180 / M_PI + 90; // 加90度以调整初始方向
+    }
+
+    painter->save();
+    if (towerType == CANNON) {
+        // 平移到图片中心，以便围绕中心旋转
+        painter->translate(rotationCenter.x(), rotationCenter.y());
+        painter->rotate(rotationAngle);
+        // 绘制旋转后的炮塔图片
+        if (level > 1) {
+            painter->drawPixmap(-upgradedPixmap.width() / 2, -upgradedPixmap.height() / 2, upgradedPixmap.scaled(80, 80, Qt::KeepAspectRatio));
+        } else {
+            painter->drawPixmap(-pixmap.width() / 2, -pixmap.height() / 2, pixmap.scaled(80, 80, Qt::KeepAspectRatio));
+        }
+    }
+    else {
+        // 对于非CANNON炮塔，直接绘制
+        if (level > 1) {
+            painter->drawPixmap(position.x() , position.y(), upgradedPixmap.scaled(80, 80, Qt::KeepAspectRatio));
+        } else {
+            painter->drawPixmap(position.x(), position.y(), pixmap.scaled(80, 80, Qt::KeepAspectRatio));
+        }
+    }
+    painter->restore();
+}
+// 升级炮塔的方法实现
+void Tower::upgrade()
+{
+    if (towerType == CANNON) {
+        // 单独控制升级后cannon炮塔的位置
+        //int pitWidth = 80;
+        upgradedPosition.setX(position.x());
+        upgradedPosition.setY(position.y());
+        rotationCenter = QPointF(upgradedPosition.x() + upgradedPixmap.width() / 2, upgradedPosition.y() + upgradedPixmap.height()/2);
+    }
+    level++;
+    damage += 20;
+    range += 30;
+    upgradeCost += 30;
 }
 
 // 炮塔攻击敌人的方法实现
@@ -90,13 +141,16 @@ void Tower::attack(const QList<Enemy *>& enemies)
     // 根据不同的炮塔类型，设置子弹发射间隔
     switch (towerType) {
     case CANNON:
-        interval = 2000;  // 2s
+        interval = 500;  // 0.5s
         break;
     case POOP:
-        interval = 2500;  // 2.5s
+        interval = 1000;  // 1s
         break;
     case STAR:
-        interval = 3000;  // 3s
+        interval = 1500;  // 1.5s
+        break;
+    case FAN:
+        interval = 2000;  // 2s
         break;
     }
 
@@ -127,6 +181,20 @@ void Tower::attack(const QList<Enemy *>& enemies)
             case STAR:
                 bulletImagePath = ":/images/images/star_bullet.png";
                 break;
+            case FAN:
+                bulletImagePath = ":/images/images/fan_bullet.png";
+                break;
+            }
+            // 计算子弹发射位置
+            QPointF bulletStartPos;
+            if (towerType == CANNON) {
+                double angle = qDegreesToRadians(rotationAngle - 90);
+                double offsetX = 50 * qCos(angle); // 假设炮塔口距离中心40像素
+                double offsetY = 50 * qSin(angle);
+                bulletStartPos = rotationCenter + QPointF(offsetX, offsetY);
+            }
+            else {
+                bulletStartPos = position;
             }
             // 创建新的子弹并添加到子弹列表
             bullets.push_back(new Bullet(position, targetEnemy, damage, bulletImagePath));
@@ -143,13 +211,16 @@ void Tower::attackObstacle(Obstacle* obstacle)
     // 根据不同的炮塔类型，设置子弹发射间隔
     switch (towerType) {
     case CANNON:
-        interval = 2000;  // 2s
+        interval = 1500;
         break;
     case POOP:
-        interval = 2500;  // 2.5s
+        interval = 2000;
         break;
     case STAR:
-        interval = 3000;  // 3s
+        interval = 2000;
+        break;
+    case FAN:
+        interval = 2000;
         break;
     }
 
@@ -168,6 +239,26 @@ void Tower::attackObstacle(Obstacle* obstacle)
             case STAR:
                 bulletImagePath = ":/images/images/star_bullet.png";
                 break;
+            case FAN:
+                bulletImagePath = ":/images/images/fan_bullet.png";
+                break;
+            }
+
+            // 计算炮塔需要旋转的角度
+            QPointF targetPos = obstacle->getPosition();
+            QPointF diff = targetPos - position;
+            rotationAngle = qAtan2(diff.y(), diff.x()) * 180 / M_PI + 90; // 加90度以调整初始方向
+
+            // 计算子弹发射位置
+            QPointF bulletStartPos;
+            if (towerType == CANNON) {
+                double angle = qDegreesToRadians(rotationAngle - 90);
+                double offsetX = 35 * qCos(angle); // 假设炮塔口距离中心40像素
+                double offsetY = 35 * qSin(angle);
+                bulletStartPos = rotationCenter + QPointF(offsetX, offsetY);
+            }
+            else {
+                bulletStartPos = position;
             }
             // 创建新的子弹并添加到子弹列表
             bullets.push_back(new Bullet(position, obstacle, damage, bulletImagePath));
@@ -193,15 +284,6 @@ void Tower::updateBullets()
     }
 }
 
-// 升级炮塔的方法实现
-void Tower::upgrade()
-{
-    level++;
-    damage += 10;
-    range += 20;
-    upgradeCost += 20;
-}
-
 // 获取炮塔升级所需成本的方法实现
 int Tower::getUpgradeCost() const
 {
@@ -211,7 +293,7 @@ int Tower::getUpgradeCost() const
 // 获取出售炮塔所得金额的方法实现
 int Tower::getSellPrice() const
 {
-    return sellPrice;
+    return sellPrice * 0.5;
 }
 
 // 获取炮塔位置的方法实现
@@ -223,6 +305,9 @@ QPoint Tower::getPosition() const
 // 获取炮塔贴图的方法实现
 QPixmap Tower::getPixmap() const
 {
+    if (level > 1) {
+        return upgradedPixmap;
+    }
     return pixmap;
 }
 
@@ -239,9 +324,11 @@ int Tower::getCost(Type type)
     case CANNON:
         return 100;
     case POOP:
-        return 80;
-    case STAR:
         return 120;
+    case STAR:
+        return 160;
+    case FAN:
+        return 160;
     default:
         return 0;
     }

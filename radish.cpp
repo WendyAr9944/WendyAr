@@ -29,18 +29,18 @@ void Radish::draw(QPainter* painter)
 {
     if (health > 0) {
         // 绘制萝卜贴图
-        QPixmap radishPixmap = radishPixmaps[health - 1].scaled(70, 90);
+        QPixmap radishPixmap = radishPixmaps[health - 1].scaled(100, 100,Qt::KeepAspectRatio);
         painter->drawPixmap(position.x(), position.y(), radishPixmap);
 
         // 绘制生命值贴图
-        QPixmap healthPixmap = healthPixmaps[health - 1].scaled(40, 25);
+        QPixmap healthPixmap = healthPixmaps[health - 1].scaled(40, 25,Qt::KeepAspectRatio);
         int healthX = position.x() + radishPixmap.width(); // 萝卜右侧
         int healthY = position.y(); // 萝卜顶部
         painter->drawPixmap(healthX, healthY, healthPixmap);
     }
 }
 
-void Radish::takeDamage(int damage)
+void Radish::takeDamage(double damage)
 {
     health -= damage;
     if (health < 0) {

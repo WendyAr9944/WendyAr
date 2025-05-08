@@ -1,21 +1,20 @@
 <RCC>
     <qresource prefix="/images">
-        <file>images/map2.png</file>
-        <file>images/monster1.png</file>
-        <file>images/monster2.png</file>
-        <file>images/monster3.png</file>
-        <file>images/monster4.png</file>
-        <file>images/radish_1.png</file>
-        <file>images/radish_2.png</file>
-        <file>images/radish_3.png</file>
-        <file>images/radish_4.png</file>
-        <file>images/radish_5.png</file>
-        <file>images/radish_6.png</file>
-        <file>images/radish_7.png</file>
-        <file>images/radish_8.png</file>
-        <file>images/radish_9.png</file>
-        <file>images/radish_10.png</file>
-        <file>images/lose.jpg</file>
+        <file>images/1.png</file>
+        <file>images/2.png</file>
+        <file>images/3.png</file>
+        <file>images/background.png</file>
+        <file>images/cannon.png</file>
+        <file>images/cannon_bullet.png</file>
+        <file>images/cannon_button.png</file>
+        <file>images/cannon_upgraded.png</file>
+        <file>images/coin.png</file>
+        <file>images/double_speed_hover.png</file>
+        <file>images/double_speed_normal.png</file>
+        <file>images/fan.png</file>
+        <file>images/fan_bullet.png</file>
+        <file>images/fan_button.png</file>
+        <file>images/fan_upgraded.png</file>
         <file>images/health_1.png</file>
         <file>images/health_2.png</file>
         <file>images/health_3.png</file>
@@ -26,26 +25,60 @@
         <file>images/health_8.png</file>
         <file>images/health_9.png</file>
         <file>images/health_10.png</file>
-        <file>images/poop.png</file>
-        <file>images/star.png</file>
-        <file>images/cannon_bullet.png</file>
-        <file>images/star_bullet.png</file>
-        <file>images/poop_bullet.png</file>
-        <file>images/cannon_button.png</file>
-        <file>images/poop_button.png</file>
-        <file>images/star_button.png</file>
-        <file>images/double_speed_hover.png</file>
-        <file>images/double_speed_normal.png</file>
-        <file>images/pause_normal.png</file>
+        <file>images/level_up.png</file>
+        <file>images/lose.jpg</file>
+        <file>images/map21.png</file>
+        <file>images/monster1.png</file>
+        <file>images/monster1_2.png</file>
+        <file>images/monster2.png</file>
+        <file>images/monster2_2.png</file>
+        <file>images/monster3.png</file>
+        <file>images/monster3_2.png</file>
+        <file>images/monster4.png</file>
+        <file>images/monster4_2.png</file>
+        <file>images/monster5.png</file>
+        <file>images/monster5_2.png</file>
+        <file>images/monsterboss.png</file>
+        <file>images/obstacle1.png</file>
+        <file>images/obstacle2.png</file>
+        <file>images/obstacle3.png</file>
+        <file>images/obstacle4.png</file>
+        <file>images/obstacle5.png</file>
+        <file>images/obstacle6.png</file>
+        <file>images/obstacle7.png</file>
+        <file>images/obstacle8.png</file>
+        <file>images/obstacle9.png</file>
+        <file>images/obstacle10.png</file>
         <file>images/pause_hover.png</file>
-        <file>images/coin.png</file>
-        <file>images/cross.png</file>
+        <file>images/pause_normal.png</file>
+        <file>images/poop.png</file>
+        <file>images/poop_bullet.png</file>
+        <file>images/poop_button.png</file>
+        <file>images/poop_upgraded.png</file>
+        <file>images/radish_1.png</file>
+        <file>images/radish_1.png.png</file>
+        <file>images/radish_2.png</file>
+        <file>images/radish_3.png</file>
+        <file>images/radish_4.png</file>
+        <file>images/radish_5.png</file>
+        <file>images/radish_6.png</file>
+        <file>images/radish_7.png</file>
+        <file>images/radish_8.png</file>
+        <file>images/radish_9.png</file>
+        <file>images/radish_10.png</file>
+        <file>images/remove.png</file>
+        <file>images/remove_normal.png</file>
+        <file>images/selected_marker.png</file>
+        <file>images/star.png</file>
+        <file>images/star_bullet.png</file>
+        <file>images/star_button.png</file>
+        <file>images/star_upgraded.png</file>
+        <file>images/start.png</file>
+        <file>images/tower_pit.png</file>
         <file>images/upgrade_normal_blue.png</file>
         <file>images/upgrade_normal_gray.png</file>
-        <file>images/remove_normal.png</file>
-        <file>images/obstacle.png</file>
-        <file>images/tower_pit.png</file>
-        <file>images/cannon.png</file>
-        <file>images/monster.png</file>
+    </qresource>
+    <qresource prefix="/sounds">
+        <file>sounds/background_music.mp3</file>
     </qresource>
 </RCC>

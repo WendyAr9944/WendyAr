@@ -11,8 +11,8 @@ Bullet::Bullet(const QPoint& startPos, Enemy* target, int damage, const QString&
         // 处理图片加载失败的情况
         qDebug() << "Failed to load bullet image: " << imagePath;
     }
-    // 判断是否为星星子弹，若是则需要旋转
-    if (imagePath.contains("star_bullet")) {
+    // 判断是否为星星子弹或风扇子弹，若是则需要旋转
+    if (imagePath.contains("star_bullet") || imagePath.contains("fan_bullet")) {
         m_shouldRotate = true;
     } else {
         m_shouldRotate = false;
@@ -27,10 +27,11 @@ Bullet::Bullet(const QPoint& startPos, Obstacle* target, int damage, const QStri
         // 处理图片加载失败的情况
         qDebug() << "Failed to load bullet image: " << imagePath;
     }
-    // 判断是否为星星子弹，若是则需要旋转
-    if (imagePath.contains("star_bullet")) {
+    // 判断是否为星星子弹或风扇子弹，若是则需要旋转
+    if (imagePath.contains("star_bullet") || imagePath.contains("fan_bullet")) {
         m_shouldRotate = true;
-    } else {
+    }
+    else {
         m_shouldRotate = false;
     }
 }

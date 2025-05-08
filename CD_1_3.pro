@@ -1,9 +1,10 @@
-QT       += core gui
+QT += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
-
+QMAKE_CXXFLAGS += -Wl,--stack,8388608  # 设置堆栈大小为 8MB
+QMAKE_LFLAGS += -Wl,--stack,8388608
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -24,6 +25,7 @@ SOURCES += \
     money.cpp \
     obstacle.cpp \
     radish.cpp \
+    startwindow.cpp \
     tower.cpp \
     towerpit.cpp
 
@@ -35,6 +37,7 @@ HEADERS += \
     money.h \
     obstacle.h \
     radish.h \
+    startwindow.h \
     tower.h \
     towerpit.h
 

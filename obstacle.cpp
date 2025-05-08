@@ -1,11 +1,11 @@
 #include "obstacle.h"
 #include <QPainter>
 
-Obstacle::Obstacle(const QPointF& pos, const QString& imagePath)
+Obstacle::Obstacle(const QPointF& pos, const QString& imagePath, int width, int height)
     : position(pos), health(100), m_selected(false)
 {
     QPixmap originalPixmap(imagePath);
-    pixmap = originalPixmap.scaled(50, 50);
+    pixmap = originalPixmap.scaled(width, height, Qt::KeepAspectRatio);//根据指定1大小缩放
     selectedPixmap.load(":/images/images/selected_marker.png"); // 假设的选中标记贴图路径
 }
 

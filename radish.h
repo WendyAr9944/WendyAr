@@ -13,7 +13,7 @@ public:
     ~Radish();
 
     void draw(QPainter* painter);
-    void takeDamage(int damage);
+    void takeDamage(double damage);
     int getHealth() const;
 
 private:

@@ -7,7 +7,7 @@
 class Obstacle
 {
 public:
-    Obstacle(const QPointF& pos);
+    Obstacle(const QPointF& pos, const QString& imagePath, int width, int height);
     ~Obstacle();
 
     void draw(QPainter* painter) const;
@@ -17,12 +17,12 @@ public:
     QPixmap getPixmap() const;
     bool isSelected() const;
     void setSelected(bool selected);
+
 private:
     QPointF position;
     int health;
     QPixmap pixmap;
     bool m_selected;
-    QPixmap selectedPixmap; // 选中时的定位小贴图
+    QPixmap selectedPixmap; // 新增：选中时的定位小贴图
 };
-
 #endif // OBSTACLE_H

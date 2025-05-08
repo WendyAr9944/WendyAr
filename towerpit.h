@@ -9,7 +9,7 @@
 class TowerPit {
 public:
     // 构造函数，初始化炮塔坑的位置，默认没有炮塔
-    TowerPit(const QPoint& pos, int width = 50, int height = 50);
+    TowerPit(const QPoint& pos, int index, int width = 50, int height = 50);
 
     // 获取炮塔坑的位置
     QPoint getPosition() const;
@@ -33,6 +33,9 @@ public:
 
     // 获取炮塔坑中的障碍物
     Obstacle* getObstacle() const;
+    // 获取炮塔坑的序号
+    int getIndex() const;
+
 
 private:
     QPoint position;  // 炮塔坑的位置
@@ -40,6 +43,7 @@ private:
     int m_width;      // 炮塔坑的宽度
     int m_height;     // 炮塔坑的高度
     Obstacle* m_obstacle; // 指向障碍物的指针
+    int m_index;      // 炮塔坑的序号
 };
 
 #endif // TOWERPIT_H
