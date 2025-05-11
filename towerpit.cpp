@@ -29,6 +29,7 @@ QList<TowerPit*> TowerPit::createTowerPits() {
     QList<TowerPit*> pits;
     int index = 0;
 
+    //每隔90放置一个炮塔坑
     // 横向循环
     for (int i = 0; i < 8; ++i) {
         pits.append(new TowerPit(QPoint(300 + i * 90, 120), index++));
@@ -45,7 +46,6 @@ QList<TowerPit*> TowerPit::createTowerPits() {
     for (int i = 0; i < 4; ++i) {
         pits.append(new TowerPit(QPoint(350 + i * 90, 700), index++));
     }
-
     // 竖向循环
     for (int i = 0; i < 3; ++i) {
         pits.append(new TowerPit(QPoint(1000,200 + i * 90), index++));
