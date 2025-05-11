@@ -10,7 +10,7 @@
 // 主窗口类的构造函数实现
 mainwindow::mainwindow(QWidget *parent)
     : QWidget(parent), currentWave(0), totalWaves(5),elapsedTime(0), isGameOver(false), showButtons(false), gameSpeed(1),
-      selectedTower(nullptr), selectedObstacle(nullptr), isPaused(false), countdownValue(3) // 新增：初始化倒计时值
+      selectedTower(nullptr), selectedObstacle(nullptr), isPaused(false), countdownValue(4),isVictory(false)
 {
     ui = new Ui::mainwindow;
     ui->setupUi(this);
@@ -24,8 +24,13 @@ mainwindow::mainwindow(QWidget *parent)
     waveTimerId = -1;//
     // 创建萝卜对象
     radish = new Radish(QPoint(750, 600));
-    // 加载游戏结束图片
-    gameOverPixmap.load(":/images/images/game_over.png");
+    // 加载游戏失败图片
+    gameOverPixmap.load(":/images/images/lose.png");
+    // 加载游戏胜利贴图
+    winPixmap.load(":/images/images/win.png");
+    winPixmap = winPixmap.scaled(1200,800);
+    // 定义确定按钮点击区域（居中，覆盖贴图中的按钮区域）
+    confirmButtonRect = QRect(400,600,200, 100);
     // 创建金钱管理对象，初始金钱为450
     money = new Money(450);
     // 加载金币图标
@@ -33,7 +38,7 @@ mainwindow::mainwindow(QWidget *parent)
     // 初始化背景音乐
     bgmPlayer = new QMediaPlayer(this);
     bgmPlayer->setMedia(QUrl("qrc:/sounds/sounds/background_music.mp3")); // 设置音频文件
-    bgmPlayer->setVolume(100); // 设置音量（0-100）
+    bgmPlayer->setVolume(50); // 设置音量（0-100）
     bgmPlayer->play();
     // 实现循环播放（Qt5 需要手动连接信号）
     connect(bgmPlayer, &QMediaPlayer::stateChanged, [=]() {
@@ -129,6 +134,10 @@ mainwindow::mainwindow(QWidget *parent)
     countdownPixmaps[0].load(":/images/images/3.png"); // 替换为实际的 3 的贴图路径
     countdownPixmaps[1].load(":/images/images/2.png"); // 替换为实际的 2 的贴图路径
     countdownPixmaps[2].load(":/images/images/1.png"); // 替换为实际的 1 的贴图路径
+    countdownPixmaps[3].load(":/images/images/GO.png"); // 替换为实际的 GO 的贴图路径
+    // 定义lose按钮的点击区域（根据实际贴图调整坐标）
+    restartButtonRect = QRect(500, 400, 400, 100);  // x, y, width, height
+    returnButtonRect = QRect(500, 550, 400, 100);
 }
 
 // 主窗口类的析构函数实现，释放动态分配的资源
@@ -162,7 +171,7 @@ mainwindow::~mainwindow()
 void mainwindow::onStartGame()
 {
     startWindow->hide();
-    countdownValue = 3; // 重置倒计时值
+    countdownValue = 4; // 重置倒计时值
     countdownLabel->show();
     countdownTimer->start(1000); // 每秒触发一次
 }
@@ -203,7 +212,7 @@ void mainwindow::paintEvent(QPaintEvent *event)
         // 绘制游戏地图
         painter.drawPixmap(0, 0, mapPixmap.scaled(width(), height()));
     }
-        // 绘制所有敌人
+    // 绘制所有敌人
     for (Enemy* enemy : enemies) {
         enemy->draw(&painter);
     }
@@ -228,7 +237,11 @@ void mainwindow::paintEvent(QPaintEvent *event)
     for (Obstacle* obstacle : obstacles) {
         obstacle->draw(&painter);
     }
-
+    // 绘制倒计时贴图
+    if (countdownValue > 0 && countdownValue <= 4) {
+        QPixmap countdownPixmap = countdownPixmaps[4 - countdownValue];
+        painter.drawPixmap((width() - countdownPixmap.width()) / 2, (height() - countdownPixmap.height()) / 2, countdownPixmap);
+    }
     // 如果需要显示创建炮塔的按钮，则绘制它们
         if (showButtons) {
             QPixmap cannonButtonPixmap(":/images/images/cannon_button.png");
@@ -260,22 +273,16 @@ void mainwindow::paintEvent(QPaintEvent *event)
                 upgradePixmap = QPixmap(":/images/images/upgrade_normal_gray.png").scaled(50,50,Qt::KeepAspectRatio);
             }
             // 计算升级按钮的位置并绘制
-            QPoint upgradePos(selectedTower->getPosition().x()+10, selectedTower->getPosition().y() - upgradePixmap.height());
+            QPoint upgradePos(selectedTower->getPosition().x(), selectedTower->getPosition().y() - upgradePixmap.height()-20);
             painter.drawPixmap(upgradePos, upgradePixmap);
 
             // 加载移除按钮的图片
             QPixmap removePixmap;
             removePixmap=QPixmap(":/images/images/remove_normal.png").scaled(50,50,Qt::KeepAspectRatio);
             // 计算移除按钮的位置并绘制
-            QPoint removePos(selectedTower->getPosition().x(), selectedTower->getPosition().y() + 80);
+            QPoint removePos(selectedTower->getPosition().x(), selectedTower->getPosition().y() + 100);
             painter.drawPixmap(removePos, removePixmap);
         }
-
-    // 如果游戏结束，绘制游戏结束图片
-    if (isGameOver) {
-        painter.drawPixmap((width() - gameOverPixmap.width()) / 2, (height() - gameOverPixmap.height()) / 2, gameOverPixmap);
-    }
-
     // 绘制当前金钱数量
     QFont font;
     font.setFamily("Times New Roman"); // 设置字体家族为Times New Roman
@@ -303,10 +310,13 @@ void mainwindow::paintEvent(QPaintEvent *event)
         painter.setFont(waveFont);
         QRect waveRect(0, 15, width(), 50);
         painter.drawText(waveRect, Qt::AlignHCenter | Qt::AlignVCenter, waveText);
-        // 绘制倒计时贴图
-        if (countdownValue > 0 && countdownValue <= 3) {
-            QPixmap countdownPixmap = countdownPixmaps[3 - countdownValue];
-            painter.drawPixmap((width() - countdownPixmap.width()) / 2, (height() - countdownPixmap.height()) / 2, countdownPixmap);
+        // 如果游戏胜利，绘制胜利贴图
+        if (isVictory) {
+            painter.drawPixmap(0, 0, width(), height(), winPixmap);
+        }
+        // 否则，如果游戏失败，绘制失败贴图
+        else if (isGameOver) {
+            painter.drawPixmap(0, 0, width(), height(), gameOverPixmap);
         }
 }
 
@@ -394,6 +404,12 @@ void mainwindow::timerEvent(QTimerEvent *event)
                 Enemy* enemy = *it;
                 enemy->move();
                 if (enemy->getHealth() <= 0 || isEnemyAtEnd(enemy)) {
+                    // 检测是否消灭了Boss且萝卜存活
+                    if (enemy->getType() == Enemy::MonsterBoss && enemy->getHealth() <= 0 && radish->getHealth() > 0) {
+                        isVictory = true;//游戏胜利
+                        killTimer(waveTimerId);
+                        waveTimerId = -1;
+                    }
                     if (enemy->getHealth() <= 0) {
                         // 根据不同类型的敌人增加不同数量的金钱
                         switch (enemy->getType()) {
@@ -459,12 +475,13 @@ void mainwindow::timerEvent(QTimerEvent *event)
                 }
             }
 
-            // 如果萝卜生命值为0，游戏结束
+            // 如果萝卜生命值为0，游戏失败
             if (radish->getHealth() <= 0) {
                 isGameOver = true;
+                killTimer(waveTimerId);  // 立即停止定时器
+                waveTimerId = -1;
             }
         }
-
         // 更新界面
         update();
     }
@@ -473,9 +490,26 @@ void mainwindow::timerEvent(QTimerEvent *event)
 // 鼠标按下事件处理函数的实现，处理鼠标点击操作
 void mainwindow::mousePressEvent(QMouseEvent *event)
 {
-    if (isGameOver) {
-        return;
+    if (isVictory) {
+        QPoint clickPos = event->pos();
+        if (confirmButtonRect.contains(clickPos)) {
+            returnToStart(); // 返回开始界面
+            return;
+        }
     }
+    if (isGameOver) {
+            QPoint clickPos = event->pos();
+            // 检查是否点击了重新开始按钮区域
+            if (restartButtonRect.contains(clickPos)) {
+                restartGame();
+                return;
+            }
+            // 检查是否点击了返回按钮区域
+            if (returnButtonRect.contains(clickPos)) {
+                returnToStart();
+                return;
+            }
+        }
 
     QPoint clickPos = event->pos();
 
@@ -536,18 +570,18 @@ void mainwindow::mousePressEvent(QMouseEvent *event)
             QPixmap upgradePixmap;
             // 根据金币数量选择升级按钮的图片
             if (money->canAfford(selectedTower->getUpgradeCost())) {
-                upgradePixmap = QPixmap(":/images/images/upgrade_normal_blue.png");
+                upgradePixmap = QPixmap(":/images/images/upgrade_normal_blue.png").scaled(50, 50, Qt::KeepAspectRatio);
             } else {
-                upgradePixmap = QPixmap(":/images/images/upgrade_normal_gray.png");
+                upgradePixmap = QPixmap(":/images/images/upgrade_normal_gray.png").scaled(50, 50, Qt::KeepAspectRatio);
             }
             // 计算升级按钮的矩形区域
             QPoint upgradePos(selectedTower->getPosition().x(), selectedTower->getPosition().y() - upgradePixmap.height());
             QRect upgradeRect(upgradePos, upgradePixmap.size());
 
             // 加载移除按钮的图片
-            QPixmap removePixmap(":/images/images/remove_normal.png");
+            QPixmap removePixmap=QPixmap(":/images/images/remove_normal.png").scaled(50, 50, Qt::KeepAspectRatio);
             // 计算移除按钮的矩形区域
-            QPoint removePos(selectedTower->getPosition().x(), selectedTower->getPosition().y()+removePixmap.height());
+            QPoint removePos(selectedTower->getPosition().x(), selectedTower->getPosition().y() + selectedTower->getPixmap().height()-35);
             QRect removeRect(removePos, removePixmap.size());
 
             // 如果点击了升级按钮且金币足够，进行升级操作并取消选中
@@ -631,7 +665,7 @@ void mainwindow::mousePressEvent(QMouseEvent *event)
                 return;
             }
         }
-    }
+}
 
 // 生成指定类型的怪物
 void mainwindow::generateMonster(int type)
@@ -715,5 +749,55 @@ void mainwindow::handleButtonClick(Button::ButtonType type)
         break;
     case Button::TOWER_REMOVE:
         break;
+    case Button::RESTART:
+        break;
+    case Button:: RETURN:
+        break;
     }
+}
+// 重新开始游戏逻辑
+void mainwindow::restartGame() {
+    // 重置游戏状态
+    isGameOver = false;
+    isVictory = false;
+    currentWave = 0;
+    elapsedTime = 0;
+    radish->resetHealth();
+    money->reset(450);
+
+    // 清空敌人和炮塔
+    for (Enemy* enemy : enemies) delete enemy;
+    enemies.clear();
+    for (Tower* tower : towers) delete tower;
+    towers.clear();
+
+    // 重启定时器
+    if (waveTimerId != -1) killTimer(waveTimerId);
+    waveTimerId = startTimer(100);
+    update();
+}
+
+// 返回开始界面逻辑
+void mainwindow::returnToStart()
+{
+    // 重置所有游戏状态
+    isGameOver = false;
+    isVictory = false;
+    currentWave = 0;
+    elapsedTime = 0;
+    radish->resetHealth();
+    money->reset(450);
+
+    // 清空敌人和炮塔
+    qDeleteAll(enemies);
+    enemies.clear();
+    qDeleteAll(towers);
+    towers.clear();
+
+    // 显示开始界面
+    startWindow->show();
+    this->hide();
+
+    // 停止定时器
+    if (waveTimerId != -1) killTimer(waveTimerId);
 }

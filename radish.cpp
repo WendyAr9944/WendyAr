@@ -52,3 +52,7 @@ int Radish::getHealth() const
 {
     return health;
 }
+//重置生命值
+void Radish::resetHealth() {
+    health = 10;
+}

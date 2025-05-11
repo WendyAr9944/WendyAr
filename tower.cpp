@@ -23,8 +23,8 @@ Tower::Tower(Type type, const QPoint& pos)
         upgradedPixmap.load(":/images/images/cannon_upgraded.png");
         range = 200; // 射程
         damage = 50;
-        upgradeCost = 80;
-        sellPrice = 30;
+        upgradeCost = 180;
+        sellPrice = 50;
         // 设置旋转中心，这里假设旋转中心
         rotationCenter = QPointF(position.x() + pixmap.width() / 2, position.y() + pixmap.height()/2);
         break;
@@ -33,24 +33,24 @@ Tower::Tower(Type type, const QPoint& pos)
         upgradedPixmap.load(":/images/images/poop_upgraded.png");
         range = 200;
         damage = 50;
-        upgradeCost = 80;
-        sellPrice = 25;
+        upgradeCost = 180;
+        sellPrice = 50;
         break;
     case STAR:
         pixmap.load(":/images/images/star.png");
         upgradedPixmap.load(":/images/images/star_upgraded.png");
         range = 240;
         damage = 80;
-        upgradeCost = 80;
-        sellPrice = 35;
+        upgradeCost = 180;
+        sellPrice = 50;
         break;
     case FAN:
         pixmap.load(":/images/images/fan.png");
         upgradedPixmap.load(":/images/images/fan_upgraded.png");
         range = 240;
         damage = 30;
-        upgradeCost = 80;
-        sellPrice = 40;
+        upgradeCost = 180;
+        sellPrice = 50;
         break;
     }
     // 初始化上次发射子弹的时间

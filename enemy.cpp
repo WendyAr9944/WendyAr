@@ -6,7 +6,7 @@ Enemy::Enemy(Type type)
     switch (type) {
     case Monster1:
         speed = 4;
-        health = 100;
+        health = 200;
         enemyPixmap.load(":/images/images/monster1.png");
         enemyPixmap2.load(":/images/images/monster1_2.png"); // 加载第二张贴图
         pathPoints << QPointF(400, 200)   // 起点
@@ -19,7 +19,7 @@ Enemy::Enemy(Type type)
         break;
     case Monster2:
         speed = 6;
-        health = 100;
+        health = 200;
         enemyPixmap.load(":/images/images/monster2.png");
         enemyPixmap2.load(":/images/images/monster2_2.png"); // 加载第二张贴图
         pathPoints << QPointF(400, 240)   // 起点
@@ -32,7 +32,7 @@ Enemy::Enemy(Type type)
         break;
     case Monster3:
         speed = 4;
-        health = 120;
+        health = 250;
         enemyPixmap.load(":/images/images/monster3.png");
         enemyPixmap2.load(":/images/images/monster3_2.png"); // 加载第二张贴图
         pathPoints << QPointF(400, 200)   // 起点
@@ -45,7 +45,7 @@ Enemy::Enemy(Type type)
         break;
     case Monster4:
             speed = 3.5;
-            health = 150;
+            health = 250;
             enemyPixmap.load(":/images/images/monster4.png"); // 新怪兽第一张贴图
             enemyPixmap2.load(":/images/images/monster4_2.png"); // 新怪兽第二张贴图
             pathPoints << QPointF(400, 200)   // 起点
@@ -58,7 +58,7 @@ Enemy::Enemy(Type type)
             break;
         case Monster5:
             speed = 4;
-            health = 2000;
+            health = 250;
             enemyPixmap.load(":/images/images/monster5.png"); // 新怪兽第一张贴图
             enemyPixmap2.load(":/images/images/monster5_2.png"); // 新怪兽第二张贴图
             pathPoints << QPointF(400, 200)   // 起点
@@ -71,7 +71,7 @@ Enemy::Enemy(Type type)
             break;
     case MonsterBoss:
         speed = 2;
-        health = 180;
+        health = 1500;
         enemyPixmap.load(":/images/images/monsterboss.png");
         enemyPixmap2.load(":/images/images/monsterboss.png"); // 加载第二张贴图
         pathPoints << QPointF(400, 200)   // 起点

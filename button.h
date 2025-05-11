@@ -12,7 +12,9 @@ public:
         DOUBLE_SPEED,
         CLICK_OBSTACLE,
         TOWER_UPGRADE,
-        TOWER_REMOVE
+        TOWER_REMOVE,
+        RESTART,
+        RETURN
     };
 
     Button(const QPoint& pos, const QPixmap& normalPixmap, const QPixmap& hoverPixmap, ButtonType type);

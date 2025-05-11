@@ -2,7 +2,7 @@
 #include <QPainter>
 
 Obstacle::Obstacle(const QPointF& pos, const QString& imagePath, int width, int height)
-    : position(pos), health(100), m_selected(false)
+    : position(pos), health(300), m_selected(false)
 {
     QPixmap originalPixmap(imagePath);
     pixmap = originalPixmap.scaled(width, height, Qt::KeepAspectRatio);//根据指定1大小缩放

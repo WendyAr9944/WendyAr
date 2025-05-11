@@ -26,7 +26,6 @@
         <file>images/health_9.png</file>
         <file>images/health_10.png</file>
         <file>images/level_up.png</file>
-        <file>images/lose.jpg</file>
         <file>images/map21.png</file>
         <file>images/monster1.png</file>
         <file>images/monster1_2.png</file>
@@ -72,11 +71,13 @@
         <file>images/star.png</file>
         <file>images/star_bullet.png</file>
         <file>images/star_button.png</file>
-        <file>images/star_upgraded.png</file>
-        <file>images/start.png</file>
         <file>images/tower_pit.png</file>
         <file>images/upgrade_normal_blue.png</file>
         <file>images/upgrade_normal_gray.png</file>
+        <file>images/GO.png</file>
+        <file>images/star_upgraded.png</file>
+        <file>images/lose.png</file>
+        <file>images/win.png</file>
     </qresource>
     <qresource prefix="/sounds">
         <file>sounds/background_music.mp3</file>

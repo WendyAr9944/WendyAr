@@ -44,6 +44,8 @@ private slots:
     void onStartGame();    // 处理开始游戏信号的槽函数
     void onShowRules();    // 处理显示规则信号的槽函数
     void countdown();      // 倒计时槽函数
+    void restartGame();       // 重新开始游戏
+    void returnToStart();     // 返回开始界面
 
 private:
     Ui::mainwindow* ui; // UI界面指针
@@ -74,8 +76,13 @@ private:
     QLabel *countdownLabel;   // 倒计时标签指针
     QTimer *countdownTimer;   // 倒计时定时器指针
     int countdownValue;       // 倒计时数值
-    QPixmap countdownPixmaps[3]; // 用于存储倒计时 3，2，1 的贴图
+    QPixmap countdownPixmaps[4]; // 用于存储倒计时 3，2，1 的贴图
     QPixmap backgroundPixmap;
+    QRect restartButtonRect;  // 重新开始按钮的点击区域
+    QRect returnButtonRect;   // 返回按钮的点击区域
+    bool isVictory;// 是否胜利
+    QPixmap winPixmap;// 胜利贴图
+    QRect confirmButtonRect;// 确定按钮点击区域
 
     // 生成指定波数的怪物
     void generateWave(int wave);

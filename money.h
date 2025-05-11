@@ -18,6 +18,9 @@ public:
     // 增加指定数量的金钱
     void earn(int amount);
 
+    //重置金钱
+    void reset(int amount) { this->amount = amount; }
+
 private:
     int amount;
 };
