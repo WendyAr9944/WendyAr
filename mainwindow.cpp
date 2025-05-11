@@ -17,11 +17,22 @@ mainwindow::mainwindow(QWidget *parent)
     this->setFixedSize(1200, 800); // 设置窗口固定大小为 1200x800
     // 加载初始界面背景图片
     backgroundPixmap.load(":/images/images/background.png");
+    // 初始化背景音乐
+    bgmPlayer = new QMediaPlayer(this);
+    bgmPlayer->setMedia(QUrl("qrc:/sounds/sounds/background_music.mp3")); // 设置音频文件
+    bgmPlayer->setVolume(50); // 设置音量（0-100）
+    bgmPlayer->play();
+    // 实现循环播放（Qt5 需要手动连接信号）
+    connect(bgmPlayer, &QMediaPlayer::stateChanged, [=]() {
+        if (bgmPlayer->state() == QMediaPlayer::StoppedState) {
+            bgmPlayer->play(); // 播放结束后重新播放
+        }
+    });
     // 加载游戏地图图片
     mapPixmap.load(":/images/images/map21.png");
     setFixedSize(1200, 800);
-    // 启动定时器，每隔100毫秒触发一次定时器事件
-    waveTimerId = -1;//
+    // 初始化定时器 ID，未点击开始游戏，计时器为无效状态
+    waveTimerId = -1;
     // 创建萝卜对象
     radish = new Radish(QPoint(750, 600));
     // 加载游戏失败图片
@@ -35,17 +46,6 @@ mainwindow::mainwindow(QWidget *parent)
     money = new Money(450);
     // 加载金币图标
     coinPixmap.load(":/images/images/coin.png");
-    // 初始化背景音乐
-    bgmPlayer = new QMediaPlayer(this);
-    bgmPlayer->setMedia(QUrl("qrc:/sounds/sounds/background_music.mp3")); // 设置音频文件
-    bgmPlayer->setVolume(50); // 设置音量（0-100）
-    bgmPlayer->play();
-    // 实现循环播放（Qt5 需要手动连接信号）
-    connect(bgmPlayer, &QMediaPlayer::stateChanged, [=]() {
-        if (bgmPlayer->state() == QMediaPlayer::StoppedState) {
-            bgmPlayer->play(); // 播放结束后重新播放
-        }
-    });
 
     // 加载各种按钮的正常状态图片
     QPixmap pauseNormalPixmap(":/images/images/pause_normal.png");
@@ -571,7 +571,8 @@ void mainwindow::mousePressEvent(QMouseEvent *event)
             // 根据金币数量选择升级按钮的图片
             if (money->canAfford(selectedTower->getUpgradeCost())) {
                 upgradePixmap = QPixmap(":/images/images/upgrade_normal_blue.png").scaled(50, 50, Qt::KeepAspectRatio);
-            } else {
+            }
+            else {
                 upgradePixmap = QPixmap(":/images/images/upgrade_normal_gray.png").scaled(50, 50, Qt::KeepAspectRatio);
             }
             // 计算升级按钮的矩形区域
@@ -677,12 +678,14 @@ void mainwindow::generateMonster(int type)
 bool mainwindow::isEnemyAtEnd(Enemy* enemy)
 {
     QPointF endPoint = enemy->getPathPoints().last();
+    // 比较敌人当前的位置和终点位置是否相同，如果相同则说明敌人到达了终点
     return enemy->getPosition() == endPoint;
 }
 
 // 检查敌人是否与萝卜碰撞，并处理萝卜的生命值减少
 void mainwindow::checkEnemyCollideWithRadish()
 {
+     // 遍历所有敌人，检查是否到达终点（萝卜位置）
     for (Enemy* enemy : enemies) {
         if (isEnemyAtEnd(enemy)) {
             switch (enemy->getType()) {

@@ -110,7 +110,9 @@ QPointF Bullet::getTargetPosition() const
 // 检查是否到达目标并造成伤害的方法实现
 void Bullet::checkAndApplyDamage()
 {
+    // 获取子弹的目标位置
     QPointF targetPos = getTargetPosition();
+    // 计算子弹当前位置和目标位置的曼哈顿距离（横纵距离之和），并判断是否小于等于子弹的移动速度，是的话就认为子弹击中了目标
     if ((m_currentPos - targetPos).manhattanLength() <= m_speed) {
         if (m_enemyTarget) {
             // 若目标为敌人，敌人受到伤害

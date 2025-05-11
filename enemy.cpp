@@ -93,27 +93,34 @@ Enemy::~Enemy()
 
 void Enemy::move()
 {
+    // 检查是否还有路径点需要移动（确保不会越界）
     if (currentPathIndex < pathPoints.size()) {
+        // 获取当前要移动到的目标点
         QPointF target = pathPoints[currentPathIndex];
         // 处理敌人在 X 轴上的移动
         if (position.x() < target.x()) {
+            // 如果敌人在目标点左侧，则向右移动
+            // 使用平滑移动算法std::min确保不会超过目标点（防止移动过头）
             position.setX(std::min(position.x() + speed, target.x()));
         }
         else if (position.x() > target.x()) {
+            // 如果敌人在目标点右侧，则向左移动
+            // 使用std::max确保不会超过目标点
             position.setX(std::max(position.x() - speed, target.x()));
         }
-        // 处理敌人在 Y 轴上的移动
+        // 处理敌人在 Y 轴上的移动（逻辑与 X 轴相同）
         if (position.y() < target.y()) {
             position.setY(std::min(position.y() + speed, target.y()));
         }
         else if (position.y() > target.y()) {
             position.setY(std::max(position.y() - speed, target.y()));
         }
+        // 当敌人到达当前目标点时，更新索引指向下一个路径点
         if (position == target) {
             currentPathIndex++;
         }
     }
-    switchPixmap(); // 移动时切换贴图
+    switchPixmap(); // 移动时切换贴图以实现动态效果
 }
 
 void Enemy::draw(QPainter* painter)

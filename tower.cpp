@@ -68,11 +68,12 @@ Tower::~Tower()
 // 绘制炮塔的方法实现
 void Tower::draw(QPainter* painter, const QList<Enemy *>& enemies, Obstacle* obstacle)
 {
-    QPointF targetPos;
-    Enemy* targetEnemy = nullptr;
-    double maxTraveledDistance = 0;
+    QPointF targetPos; // 目标位置（敌人或障碍物）
+    Enemy* targetEnemy = nullptr; // 目标敌人
+    double maxTraveledDistance = 0; // 敌人已移动的最大距离
 
-    // 寻找射程范围内已移动路径最远的敌人
+    // 第一阶段：寻找射程范围内的目标
+    // 寻找射程范围内已移动路径最远的敌人（最接近终点的敌人）
     for (Enemy* enemy : enemies) {
         if ((enemy->getPosition() - position).manhattanLength() <= range) {
             double traveledDistance = enemy->getTraveledDistance();
@@ -82,29 +83,34 @@ void Tower::draw(QPainter* painter, const QList<Enemy *>& enemies, Obstacle* obs
             }
         }
     }
-
+    // 如果找到敌人，记录其位置
     if (targetEnemy) {
         targetPos = targetEnemy->getPosition();
     }
+    // 否则检查是否有障碍物且在射程内
     else if (obstacle && isInRange(obstacle->getPosition())) {
         targetPos = obstacle->getPosition();
     }
-
+    // 第二阶段：计算炮塔需要旋转的角度
     if (!targetPos.isNull()) {
-        // 计算炮塔需要旋转的角度
+        // 计算从炮塔位置到目标的向量
         QPointF diff = targetPos - position;
+        // 使用atan2计算角度（弧度），然后转换为度
+        // 加90度是为了调整坐标系（Qt默认0度指向右侧，而游戏需要0度指向上方）
         rotationAngle = qAtan2(diff.y(), diff.x()) * 180 / M_PI + 90; // 加90度以调整初始方向
     }
-
-    painter->save();
+    // 第三阶段：绘制炮塔（带旋转效果）
+    painter->save();// 保存当前绘制状态（防止影响其他元素）
     if (towerType == CANNON) {
-        // 平移到图片中心，以便围绕中心旋转
-        painter->translate(rotationCenter.x(), rotationCenter.y());
-        painter->rotate(rotationAngle);
-        // 绘制旋转后的炮塔图片
+        // 加农炮需要特殊处理旋转（围绕中心旋转）
+        painter->translate(rotationCenter.x(), rotationCenter.y()); // 平移到旋转中心
+        painter->rotate(rotationAngle); // 旋转指定角度
+
+        // 绘制旋转后的炮塔图片（根据等级选择普通或升级后的贴图）
         if (level > 1) {
             painter->drawPixmap(-upgradedPixmap.width() / 2, -upgradedPixmap.height() / 2, upgradedPixmap.scaled(80, 80, Qt::KeepAspectRatio));
-        } else {
+        }
+        else {
             painter->drawPixmap(-pixmap.width() / 2, -pixmap.height() / 2, pixmap.scaled(80, 80, Qt::KeepAspectRatio));
         }
     }
@@ -116,8 +122,9 @@ void Tower::draw(QPainter* painter, const QList<Enemy *>& enemies, Obstacle* obs
             painter->drawPixmap(position.x(), position.y(), pixmap.scaled(80, 80, Qt::KeepAspectRatio));
         }
     }
-    painter->restore();
+    painter->restore();// 恢复绘制状态
 }
+
 // 升级炮塔的方法实现
 void Tower::upgrade()
 {
@@ -138,36 +145,38 @@ void Tower::upgrade()
 void Tower::attack(const QList<Enemy *>& enemies)
 {
     int interval = 0;
-    // 根据不同的炮塔类型，设置子弹发射间隔
+    // 根据不同的炮塔类型，设置子弹发射间隔（毫秒）
     switch (towerType) {
-    case CANNON:
-        interval = 500;  // 0.5s
+    case CANNON:  // 加农炮射速最快
+        interval = 500;  // 0.5秒发射一次
         break;
-    case POOP:
-        interval = 1000;  // 1s
+    case POOP:    // 便便炮塔次之
+        interval = 1000;  // 1秒发射一次
         break;
-    case STAR:
-        interval = 1500;  // 1.5s
+    case STAR:    // 星星炮塔较慢
+        interval = 1500;  // 1.5秒发射一次
         break;
-    case FAN:
-        interval = 2000;  // 2s
+    case FAN:     // 风扇炮塔射速最慢
+        interval = 2000;  // 2秒发射一次
         break;
     }
-
-    // 检查是否达到发射间隔
+    // 检查是否达到发射间隔（防止炮塔无限连发）
     if (lastShotTime.msecsTo(QTime::currentTime()) >= interval) {
-        Enemy* targetEnemy = nullptr;
-        double maxTraveledDistance = 0;
-        // 寻找射程范围内已移动路径最远的敌人
+        Enemy* targetEnemy = nullptr;  // 目标敌人
+        double maxTraveledDistance = 0;  // 敌人已移动的最大距离
+        // 遍历所有敌人，寻找射程范围内最移动距离最远的敌人
         for (Enemy* enemy : enemies) {
+            // 计算敌人与炮塔的距离（横纵距离之和）
             if ((enemy->getPosition() - position).manhattanLength() <= range) {
+                // 如果敌人在射程内，比较它已移动的距离
                 double traveledDistance = enemy->getTraveledDistance();
                 if (traveledDistance > maxTraveledDistance) {
                     maxTraveledDistance = traveledDistance;
-                    targetEnemy = enemy;
+                    targetEnemy = enemy;  // 记录距离最远的敌人为目标
                 }
             }
         }
+        // 如果找到目标敌人，就发射子弹
         if (targetEnemy) {
             QString bulletImagePath;
             // 根据炮塔类型选择子弹贴图
@@ -185,20 +194,22 @@ void Tower::attack(const QList<Enemy *>& enemies)
                 bulletImagePath = ":/images/images/fan_bullet.png";
                 break;
             }
-            // 计算子弹发射位置
+            // 计算子弹发射位置（从炮塔中心还是炮口）
             QPointF bulletStartPos;
             if (towerType == CANNON) {
+                // 加农炮需要计算炮口位置（考虑旋转角度）
                 double angle = qDegreesToRadians(rotationAngle - 90);
-                double offsetX = 50 * qCos(angle); // 假设炮塔口距离中心40像素
-                double offsetY = 50 * qSin(angle);
+                double offsetX = 50 * qCos(angle);  // 炮口偏移量（X方向）
+                double offsetY = 50 * qSin(angle);  // 炮口偏移量（Y方向）
                 bulletStartPos = rotationCenter + QPointF(offsetX, offsetY);
             }
             else {
+                // 其他炮塔从中心发射
                 bulletStartPos = position;
             }
             // 创建新的子弹并添加到子弹列表
             bullets.push_back(new Bullet(position, targetEnemy, damage, bulletImagePath));
-            // 更新上次发射子弹的时间
+            // 更新上次发射时间，用于控制射速
             lastShotTime = QTime::currentTime();
         }
     }
