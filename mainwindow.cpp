@@ -6,6 +6,8 @@
 #include <QMouseEvent>
 #include "ui_mainwindow.h"
 #include <QPixmap>
+//mainwindow 类是整个游戏的核心
+//它负责管理游戏的整体逻辑，包括游戏的初始化、定时器事件处理、鼠标点击事件处理以及游戏界面的绘制等。
 
 // 主窗口类的构造函数实现
 mainwindow::mainwindow(QWidget *parent)
@@ -14,13 +16,14 @@ mainwindow::mainwindow(QWidget *parent)
 {
     ui = new Ui::mainwindow;
     ui->setupUi(this);
+    this->setWindowTitle("Carrot_Defence保卫萝卜");  // 窗口标题设置
     this->setFixedSize(1200, 800); // 设置窗口固定大小为 1200x800
     // 加载初始界面背景图片
     backgroundPixmap.load(":/images/images/background.png");
     // 初始化背景音乐
     bgmPlayer = new QMediaPlayer(this);
     bgmPlayer->setMedia(QUrl("qrc:/sounds/sounds/background_music.mp3")); // 设置音频文件
-    bgmPlayer->setVolume(50); // 设置音量（0-100）
+    bgmPlayer->setVolume(1); // 设置音量（0-100）
     bgmPlayer->play();
     // 实现循环播放（Qt5 需要手动连接信号）
     connect(bgmPlayer, &QMediaPlayer::stateChanged, [=]() {
@@ -161,10 +164,10 @@ mainwindow::~mainwindow()
     delete radish;
     delete money;
     delete ui;
-    delete startWindow;   // 新增：释放 StartWindow 对象
-    delete countdownLabel; // 新增：释放倒计时标签
-    delete countdownTimer; // 新增：释放倒计时定时器
-    delete bgmPlayer;      // 释放音乐播放器
+    delete startWindow;
+    delete countdownLabel;
+    delete countdownTimer;
+    delete bgmPlayer;
 }
 
 // 处理开始游戏信号的槽函数
@@ -176,14 +179,14 @@ void mainwindow::onStartGame()
     countdownTimer->start(1000); // 每秒触发一次
 }
 
-// 新增：处理显示规则信号的槽函数
+// 处理显示规则信号的槽函数
 void mainwindow::onShowRules()
 {
     // 显示规则说明文本
     QMessageBox::information(this, "规则说明", "这里是游戏的规则说明文本。");
 }
 
-// 新增：倒计时槽函数
+// 倒计时槽函数
 void mainwindow::countdown()
 {
     if (countdownValue > 0) {
@@ -328,11 +331,10 @@ void mainwindow::timerEvent(QTimerEvent *event)
             return;
         }
 
-        for (int i = 0; i < gameSpeed; ++i) {
-            // 增加游戏已过去的时间
+        for (int i = 0; i < gameSpeed; i++) {
             elapsedTime += 100;
 
-            // 第一波怪物生成逻辑
+            // 第一波：0-20秒
             if (currentWave == 0 && elapsedTime <= 20000) {
                 if (elapsedTime % 3000 == 0) {
                     generateMonster(Enemy::Monster1);
@@ -340,63 +342,77 @@ void mainwindow::timerEvent(QTimerEvent *event)
                 if (elapsedTime % 5000 == 0) {
                     generateMonster(Enemy::Monster2);
                 }
-            } else if (elapsedTime == 20000) {
-                // 进入第二波
+            }
+            // 进入第二波判断（>=20秒）
+            else if (currentWave == 0 && elapsedTime >= 20000) {
                 currentWave = 1;
+                elapsedTime = 20000;
             }
 
-            // 第二波怪物生成逻辑
+            // 第二波：20-40秒
             if (currentWave == 1 && elapsedTime - 20000 <= 20000) {
-                if ((elapsedTime - 20000) % 3000 == 0) {
+                int waveTime = elapsedTime - 20000;
+                if (waveTime % 3000 == 0) {
                     generateMonster(Enemy::Monster3);
                 }
-                if ((elapsedTime - 20000) % 5000 == 0) {
+                if (waveTime % 5000 == 0) {
                     generateMonster(Enemy::Monster2);
                 }
-            } else if (elapsedTime == 40000) {
-                // 进入第三波
+            }
+            // 进入第三波判断（>=40秒）
+            else if (currentWave == 1 && elapsedTime >= 40000) {
                 currentWave = 2;
+                elapsedTime = 40000;
             }
 
-            // 第三波怪物生成逻辑
+            // 第三波：40-60秒
             if (currentWave == 2 && elapsedTime - 40000 <= 20000) {
-                if ((elapsedTime - 40000) % 3000 == 0) {
+                int waveTime = elapsedTime - 40000;
+                if (waveTime % 3000 == 0) {
                     generateMonster(Enemy::Monster4);
                 }
-                if ((elapsedTime - 40000) % 5000 == 0) {
+                if (waveTime % 5000 == 0) {
                     generateMonster(Enemy::Monster5);
                 }
-            } else if (elapsedTime == 60000) {
-                // 进入第四波
+            }
+            // 进入第四波判断（>=60秒）
+            else if (currentWave == 2 && elapsedTime >= 60000) {
                 currentWave = 3;
+                elapsedTime = 60000;
             }
 
-            // 第四波怪物生成逻辑
+            // 第四波：60-80秒
             if (currentWave == 3 && elapsedTime - 60000 <= 20000) {
-                if ((elapsedTime - 60000) % 3000 == 0) {
+                int waveTime = elapsedTime - 60000;
+                if (waveTime % 3000 == 0) {
                     generateMonster(Enemy::Monster1);
                 }
-                if ((elapsedTime - 60000) % 5000 == 0) {
+                if (waveTime % 5000 == 0) {
                     generateMonster(Enemy::Monster5);
                 }
-            } else if (elapsedTime == 80000) {
-                // 进入第五波
+            }
+            // 进入第五波判断（>=80秒）
+            else if (currentWave == 3 && elapsedTime >= 80000) {
                 currentWave = 4;
+                elapsedTime = 80000;
             }
 
-            // 第五波怪物生成逻辑
-            if (currentWave == 4 && elapsedTime - 80000 <= 20000) {
-                if ((elapsedTime - 80000) % 2000 == 0) {
+            // 第五波：80-110秒
+            if (currentWave == 4 && elapsedTime - 80000 <= 30000) {
+                int waveTime = elapsedTime - 80000;
+                if (waveTime % 2000 == 0) {
                     generateMonster(Enemy::Monster1);
                 }
-                if ((elapsedTime - 80000) % 4000 == 0) {
+                if (waveTime % 4000 == 0) {
                     generateMonster(Enemy::Monster2);
                 }
-                if ((elapsedTime - 80000) % 5000 == 0) {
+                if (waveTime % 5000 == 0) {
                     generateMonster(Enemy::Monster3);
                 }
-            } else if (elapsedTime - 80000 == 30000) {
-                generateMonster(Enemy::MonsterBoss);
+                // 最后生成Boss
+                if (waveTime == 30000) {
+                    generateMonster(Enemy::MonsterBoss);
+                }
             }
 
             // 移动所有敌人
@@ -486,7 +502,6 @@ void mainwindow::timerEvent(QTimerEvent *event)
         update();
     }
 }
-
 // 鼠标按下事件处理函数的实现，处理鼠标点击操作
 void mainwindow::mousePressEvent(QMouseEvent *event)
 {
@@ -617,7 +632,7 @@ void mainwindow::mousePressEvent(QMouseEvent *event)
             int buttonSize = 100;
             int gap = 10;
 
-            // 定义三个选项按钮的矩形区域
+            // 定义四个选项按钮的矩形区域
             QRect cannonButtonRect(this->clickPos.x(), this->clickPos.y(), buttonSize, buttonSize);
             QRect poopButtonRect(this->clickPos.x() + buttonSize + gap, this->clickPos.y(), buttonSize, buttonSize);
             QRect starButtonRect(this->clickPos.x() + 2 * (buttonSize + gap), this->clickPos.y(), buttonSize, buttonSize);

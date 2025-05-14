@@ -71,12 +71,12 @@ Enemy::Enemy(Type type)
             break;
     case MonsterBoss:
         speed = 2;
-        health = 1500;
+        health = 3000;
         enemyPixmap.load(":/images/images/monsterboss.png");
         enemyPixmap2.load(":/images/images/monsterboss.png"); // 加载第二张贴图
         pathPoints << QPointF(400, 200)   // 起点
-                   << QPointF(930, 200)  // 右移
-                   << QPointF(930, 400)  // 下移
+                   << QPointF(900, 200)  // 右移
+                   << QPointF(900, 400)  // 下移
                    << QPointF(210, 400)  // 左移
                    << QPointF(210, 650)  // 下移
                    << QPointF(700, 650); // 终点
@@ -91,6 +91,7 @@ Enemy::~Enemy()
 {
 }
 
+//怪物根据预设的路径点进行移动
 void Enemy::move()
 {
     // 检查是否还有路径点需要移动（确保不会越界）

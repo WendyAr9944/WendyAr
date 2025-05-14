@@ -48,7 +48,7 @@ Tower::Tower(Type type, const QPoint& pos)
         pixmap.load(":/images/images/fan.png");
         upgradedPixmap.load(":/images/images/fan_upgraded.png");
         range = 240;
-        damage = 30;
+        damage = 80;
         upgradeCost = 180;
         sellPrice = 50;
         break;

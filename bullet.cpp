@@ -72,7 +72,7 @@ void Bullet::move()
     m_currentPos += direction;
     if (m_shouldRotate) {
         // 若需要旋转，更新旋转角度
-        m_rotation += 5;  // 每次旋转 5 度
+        m_rotation += 60;  // 每次旋转 30 度
     }
 
     checkAndApplyDamage();
